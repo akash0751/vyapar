@@ -202,30 +202,25 @@ const forgotPassword = async (req, res) => {
     };
 
   const googleLogin = async (req, res) => {
-  const { token: googleToken } = req.body;
-  try {
+  const { token } = req.body;
+    try {
     const ticket = await client.verifyIdToken({
-      idToken: googleToken,
+      idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    const payload = ticket.getPayload();
 
-    let user = await User.findOne({ email: payload.email });
+    const payload = ticket.getPayload(); // Contains user's email, name, etc.
 
-    if (!user) {
-      user = new User({
-        name: payload.name,
-        email: payload.email,
-        isGoogle: true,
-      });
-      await user.save();
-    }
+    // Optionally: Create/find user in DB
+    const email = payload.email;
 
-    const token = generateToken(user);
-    res.json({ token, user: { name: user.name, email: user.email } });
+    // Optionally generate JWT or session token
+    const ourJwtToken = generateJWT({ email }); // Your own function
+
+    res.json({ token: ourJwtToken });
   } catch (err) {
-    console.error('Google OAuth error:', err);
-    res.status(401).json({ message: 'Invalid Google token' });
+    console.error("Google login verification failed:", err);
+    res.status(401).json({ error: "Invalid Google token" });
   }
 };
 
