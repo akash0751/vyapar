@@ -136,16 +136,6 @@ const Signup = () => {
             />
           </div>
 
-          {/* Optional Apple Sign Up */}
-          <button className="btn apple-button w-100 mb-3">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
-              alt="Apple Logo"
-              className="social-icon"
-            />
-            Sign up with Apple
-          </button>
-
           <p className="login-link">
             Already have an account?{" "}
             <span onClick={() => navigate("/login")} style={{ cursor: "pointer" }}>

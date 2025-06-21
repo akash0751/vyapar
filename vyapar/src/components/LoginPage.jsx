@@ -161,15 +161,6 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Optional Apple Button */}
-          <button className="social-button apple">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
-              alt="Apple Logo"
-              className="social-icon"
-            />
-            Login with Apple
-          </button>
 
           <p className="forgot-password">
             <button className="btn btn-link" onClick={handleForgotPassword}>
