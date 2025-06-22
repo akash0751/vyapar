@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import axios from "axios";
 import { FaSearch, FaShoppingCart, FaBell, FaUserCircle, FaHome } from "react-icons/fa";
 import "../styles/Product.css";
+import axiosInstance from "../utils/axiosInstance";
 
 const Product = () => {
   const { id } = useParams(); // Get product ID from URL
@@ -21,7 +21,7 @@ const Product = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`${api}/api/product/${id}`);
+        const response = await axiosInstance.get(`${api}/api/product/${id}`);
         setProduct(response.data.product);
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -57,7 +57,7 @@ const Product = () => {
         quantity,
       };
   
-      const response = await axios.post(`${api}/api/cart/add`, itemToAdd, {
+      const response = await axiosInstance.post(`${api}/api/cart/add`, itemToAdd, {
         headers: {
           Authorization: `Bearer ${token}`, // Send token in Authorization header
         },

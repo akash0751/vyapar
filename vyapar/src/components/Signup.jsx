@@ -31,7 +31,7 @@ const Signup = () => {
       );
 
       if (response.status === 200) {
-        localStorage.setItem("tempToken", response.data.token);
+        localStorage.setItem("tempToken", response.data.tempToken);
         alert("OTP sent to your email");
         navigate("/OtpVerificationPage");
       }

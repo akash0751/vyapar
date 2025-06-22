@@ -33,20 +33,20 @@ const generateToken = (user) => {
     const otp = Math.floor(100000 + Math.random() * 900000); // OTP 6-digit
 
     const user = { name, email, hashPassword };
-    const token = jwt.sign({ user, otp }, process.env.SECRET_CODE, { expiresIn: '5m' });
+    const tempToken = jwt.sign({ user, otp }, process.env.SECRET_CODE, { expiresIn: '5m' });
 
     // Send OTP email
     const message = `Your OTP is: ${otp}`;
     await sendMail(email, "Welcome to Esite", message);
 
-    res.cookie('jwt', token, {
+    res.cookie('jwt', tempToken, {
       httpOnly: true,
       secure: false,
       sameSite: 'Lax',
       maxAge: 5 * 60 * 1000 // 5 minutes
     });
 
-    res.status(200).json({ message: "OTP has been sent to your email", token });
+    res.status(200).json({ message: "OTP has been sent to your email", tempToken });
   } catch (error) {
     console.error("Error registering user:", error);
     res.status(400).send({ message: error.message });
@@ -79,16 +79,32 @@ const otpVerify = async (req, res) => {
       password: decoded.user.hashPassword
     });
 
-    const finalToken = jwt.sign({ id: user._id,role:user.role }, process.env.SECRET_CODE, { expiresIn: "7d" });
+    const accessToken = jwt.sign(
+  { id: user._id, role: user.role },
+  process.env.SECRET_CODE,
+  { expiresIn: "15m" }
+);
 
-    res.cookie("jwt", finalToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+const refreshToken = jwt.sign(
+  { id: user._id, role: user.role },
+  process.env.REFRESH_SECRET,
+  { expiresIn: "7d" }
+);
 
-    res.status(200).json({ message: "User created successfully", finalToken,user });
+// Set refresh token as secure cookie
+res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: false, // true in production
+  sameSite: "Lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000
+});
+
+res.status(200).json({
+  message: "User created successfully",
+  token: accessToken,
+  user
+});
+
 
   } catch (err) {
     return res.status(400).send({ message: err.message });
@@ -105,14 +121,18 @@ const login = async(req,res)=>{
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.SECRET_CODE, { expiresIn: "1h" });
-    
-    res.cookie('jwt', token, {
-        httpOnly: true,
-        maxAge: 24*60*60*1000 // 1 day
-    })
+    const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.SECRET_CODE, { expiresIn: "15m" });
+const refreshToken = jwt.sign({ id: user._id, role: user.role }, process.env.REFRESH_SECRET, { expiresIn: "7d" });
 
-    res.json({ message:'Logged in successfully' ,token,user});
+    res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: false, // true in production with HTTPS
+    sameSite: 'Lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+res.json({ message: 'Logged in successfully', token: accessToken, user });
+
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -224,7 +244,25 @@ const forgotPassword = async (req, res) => {
   }
 };
 
+const refreshToken = (req, res) => {
+  const token = req.cookies.refreshToken;
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.REFRESH_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403); // Invalid or expired refresh token
+
+    const newAccessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.SECRET_CODE,
+      { expiresIn: "15m" }
+    );
+
+    res.json({ token: newAccessToken });
+  });
+};
+
+
     
     
 
-module.exports = {registerForm, otpVerify, login, forgotPassword,verifyOtp, resetPassword,googleLogin};
+module.exports = {registerForm, otpVerify, login, forgotPassword,verifyOtp, resetPassword,googleLogin,refreshToken};

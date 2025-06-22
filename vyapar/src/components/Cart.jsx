@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { FaSearch, FaShoppingCart, FaBell, FaUserCircle, FaHome } from "react-icons/fa";
 import styles from "./Cart.module.css";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
+
 
 const Cart = () => {
   const { increaseQuantity, decreaseQuantity } = useCart();
@@ -16,7 +17,7 @@ const Cart = () => {
     const fetchCartItems = async () => {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-        const response = await axios.get(`${api}/api/cart`, {
+        const response = await axiosInstance.get(`${api}/api/cart`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -44,13 +45,13 @@ const Cart = () => {
   const handleRemoveFromCart = async (productId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${api}/api/remove/${productId}`, {
+      await axiosInstance.delete(`${api}/api/remove/${productId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
 
-      const response = await axios.get(`${api}/api/cart`, {
+      const response = await axiosInstance.get(`${api}/api/cart`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

@@ -24,7 +24,7 @@ const api = import.meta.env.VITE_API_URL
         { withCredentials: true }
       );
 
-      localStorage.setItem("authToken", response.data.finalToken);
+      localStorage.setItem("token", response.data.token);
       console.log(response.data.finalToken)
       localStorage.removeItem("tempToken");
        // cleanup

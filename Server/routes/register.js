@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const {registerForm, otpVerify, login, forgotPassword, verifyOtp, resetPassword,googleLogin} = require('../Controller/register')
+const {registerForm, otpVerify, login, forgotPassword, verifyOtp, resetPassword,googleLogin,refreshToken} = require('../Controller/register')
 const {addAddress,getAddress,getByIdAddress,putAddress,deleteAddress} = require('../Controller/address')
 const {adminRegister, Adminlogin} = require('../Controller/Auth')
 const {authenticateJWT, authorizeRoles} = require('../Middleware/Authorization')
@@ -13,7 +13,7 @@ router.post('/forgotPassword',forgotPassword)
 router.post('/verifyOtp',verifyOtp)
 router.post('/resetPassword',resetPassword)
 router.post('/google-login', googleLogin);
-
+router.post('/refresh-token',refreshToken)
 
 router.post('/addAddress',authMiddleware,addAddress)
 router.get('/getAddress',getAddress)
