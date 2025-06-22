@@ -75,7 +75,7 @@ const Adminlogin = async(req,res)=>{
   }
 }
 
-const refreshToken = (req, res) => {
+const adminrefreshToken = (req, res) => {
   const token = req.cookies.refreshToken;
   if (!token) return res.sendStatus(401);
 
@@ -93,4 +93,4 @@ const refreshToken = (req, res) => {
 };
 
 
-module.exports = {adminRegister,Adminlogin,refreshToken};
+module.exports = {adminRegister,Adminlogin, adminrefreshToken};

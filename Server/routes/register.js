@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const {registerForm, otpVerify, login, forgotPassword, verifyOtp, resetPassword,googleLogin,refreshToken} = require('../Controller/register')
 const {addAddress,getAddress,getByIdAddress,putAddress,deleteAddress} = require('../Controller/address')
-const {adminRegister, Adminlogin,refreshToken} = require('../Controller/Auth')
+const {adminRegister, Adminlogin, adminrefreshToken} = require('../Controller/Auth')
 const {authenticateJWT, authorizeRoles} = require('../Middleware/Authorization')
 const authMiddleware = require('../Middleware/userAuth')
 const Register = require('../Model/register')
@@ -23,7 +23,7 @@ router.delete('/deleteAddress/:id',deleteAddress)
 
 router.post('/adminRegister',adminRegister)
 router.post('/adminLogin',Adminlogin)
-router.post('/admin-refresh-token',refreshToken)
+router.post('/admin-refresh-token', adminrefreshToken)
 
 router.put("/promote/:_id", authenticateJWT, async (req, res) => {
     const { _id } = req.params;
