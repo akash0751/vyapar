@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useContext } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 
 const CartContext = createContext();
 
@@ -33,7 +33,7 @@ export const CartProvider = ({ children }) => {
   const fetchCartItemsFromAPI = async () => {
     try {
       const token = localStorage.getItem("token") || localStorage.getItem("authToken");
-      const response = await axios.get(`${api}/api/cart`, {
+      const response = await axiosInstance.get(`${api}/api/cart`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -57,7 +57,7 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`${api}/api/remove/${id}`, {
+      await axiosInstance.delete(`${api}/api/remove/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchCartItemsFromAPI();
