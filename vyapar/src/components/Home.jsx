@@ -7,7 +7,8 @@ import axiosInstance from "../utils/axiosInstance";
 const Home = () => {
   const [category, setCategory] = useState("fruits");
   const [products, setProducts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // 🔍 Search input state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true); // ⏳ Loading state
 
   const navigate = useNavigate();
   const token = localStorage.getItem('token') || localStorage.getItem('authToken');
@@ -17,33 +18,21 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         const res = await axiosInstance.get(`${api}/api/products`);
-        console.log(res.data.product);
         setProducts(res.data.product);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching products", error);
+        setLoading(false);
       }
     };
 
     fetchProducts();
   }, []);
 
-  const handleProductClick = (id) => {
-    navigate(`/product/${id}`);
-  };
+  const handleProductClick = (id) => navigate(`/product/${id}`);
+  const handleCartClick = () => navigate("/cart");
+  const handleProfileClick = () => navigate(token ? "/profile" : "/login");
 
-  const handleCartClick = () => {
-    navigate("/cart");
-  };
-
-  const handleProfileClick = () => {
-    if (token) {
-      navigate("/profile");
-    } else {
-      navigate("/login");
-    }
-  };
-
-  // Group products by category
   const productsByCategory = products.reduce((acc, product) => {
     const cat = product.category?.toLowerCase() || "others";
     if (!acc[cat]) acc[cat] = [];
@@ -51,7 +40,6 @@ const Home = () => {
     return acc;
   }, {});
 
-  // Filter products based on search
   const filteredProducts = searchQuery
     ? products.filter(product =>
         product.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -100,7 +88,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Category Buttons - hide if searching */}
+      {/* Category Buttons */}
       {!searchQuery && (
         <div className="category-buttons">
           {["fruits", "vegetables", "greens", "grocery"].map((cat) => (
@@ -115,38 +103,44 @@ const Home = () => {
         </div>
       )}
 
-      {/* Category Title - show only if not searching */}
       {!searchQuery && (
         <h2 className="category-heading">
           {category.charAt(0).toUpperCase() + category.slice(1)}
         </h2>
       )}
 
-      {/* Products */}
-      <div className="product-grid">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => (
-            <div
-              key={product._id}
-              className="product-card"
-              onClick={() => handleProductClick(product._id)}
-            >
-              <div className="product-discount">Limited Offer</div>
-              <img
-                src={`${api}/uploads/${product.image}`}
-                alt={product.title}
-                style={{ width: "150px", height: "150px", objectFit: "cover" }}
-              />
-              <div className="product-info">
-                <h3 className="product-name">{product.title}</h3>
-                <p className="product-price">₹{product.price.toFixed(2)}</p>
+      {/* Loading Spinner */}
+      {loading ? (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading products...</p>
+        </div>
+      ) : (
+        <div className="product-grid">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <div
+                key={product._id}
+                className="product-card"
+                onClick={() => handleProductClick(product._id)}
+              >
+                <div className="product-discount">Limited Offer</div>
+                <img
+                  src={`${api}/uploads/${product.image}`}
+                  alt={product.title}
+                  style={{ width: "150px", height: "150px", objectFit: "cover" }}
+                />
+                <div className="product-info">
+                  <h3 className="product-name">{product.title}</h3>
+                  <p className="product-price">₹{product.price.toFixed(2)}</p>
+                </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p className="no-products">No products available</p>
-        )}
-      </div>
+            ))
+          ) : (
+            <p className="no-products">No products available</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

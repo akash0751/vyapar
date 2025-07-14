@@ -11,7 +11,8 @@ const AdminViewProduct = () => {
   const [products, setProducts] = useState([]);
   const [editingProductId, setEditingProductId] = useState(null);
   const [editedProduct, setEditedProduct] = useState({
-    title: '', description: '', price: '', offerDescription: '', category: '', stock: '', image: null
+    title: '', description: '', price: '', offerDescription: '', category: '',
+    stock: '', unit: '', shopName: '', quantityName: '', image: null
   });
 
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -24,7 +25,6 @@ const AdminViewProduct = () => {
   const showToast = (message, type = "success") => {
     setToastMessage(message);
     type === "success" ? setShowSuccessToast(true) : setShowErrorToast(true);
-
     setTimeout(() => {
       if (type === "success") setShowSuccessToast(false);
       else setShowErrorToast(false);
@@ -47,7 +47,7 @@ const AdminViewProduct = () => {
         return;
       }
       fetchProducts(token);
-    } catch{
+    } catch {
       showToast("Access denied. Invalid token.", "error");
       navigate("/");
     }
@@ -73,7 +73,6 @@ const AdminViewProduct = () => {
     setEditedProduct({ ...product, image: null });
     setEditingProductId(product._id);
 
-    // Dynamically import Bootstrap modal and show
     const bootstrap = await import('bootstrap/dist/js/bootstrap.bundle.min.js');
     const modal = new bootstrap.Modal(modalRef.current);
     modal.show();
@@ -104,7 +103,10 @@ const AdminViewProduct = () => {
       });
 
       setEditingProductId(null);
-      setEditedProduct({ title: '', description: '', price: '', offerDescription: '', category: '', stock: '', image: null });
+      setEditedProduct({
+        title: '', description: '', price: '', offerDescription: '', category: '',
+        stock: '', unit: '', shopName: '', quantityName: '', image: null
+      });
 
       const bootstrap = await import('bootstrap/dist/js/bootstrap.bundle.min.js');
       const modal = bootstrap.Modal.getInstance(modalRef.current);
@@ -175,7 +177,17 @@ const AdminViewProduct = () => {
           <table>
             <thead>
               <tr>
-                <th>Title</th><th>Description</th><th>Price</th><th>Offer</th><th>Stock</th><th>Category</th><th>Image</th><th>Actions</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Offer</th>
+                <th>Stock</th>
+                <th>Unit</th>
+                <th>Shop</th>
+                <th>Quantity Name</th>
+                <th>Category</th>
+                <th>Image</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -186,6 +198,9 @@ const AdminViewProduct = () => {
                   <td>{product.price}</td>
                   <td>{product.offerDescription}</td>
                   <td>{product.stock}</td>
+                  <td>{product.unit || '-'}</td>
+                  <td>{product.shopName || '-'}</td>
+                  <td>{product.quantityName || '-'}</td>
                   <td>{product.category}</td>
                   <td><img src={`${api}/uploads/${product.image}`} alt={product.title} width="50" /></td>
                   <td>
@@ -214,6 +229,9 @@ const AdminViewProduct = () => {
                 <label>Price: <input className="form-control" type="number" name="price" value={editedProduct.price} onChange={handleInputChange} /></label>
                 <label>Offer: <input className="form-control" name="offerDescription" value={editedProduct.offerDescription} onChange={handleInputChange} /></label>
                 <label>Stock: <input className="form-control" type="number" name="stock" value={editedProduct.stock} onChange={handleInputChange} /></label>
+                <label>Unit: <input className="form-control" name="unit" value={editedProduct.unit} onChange={handleInputChange} /></label>
+                <label>Shop Name: <input className="form-control" name="shopName" value={editedProduct.shopName} onChange={handleInputChange} /></label>
+                <label>Quantity Name: <input className="form-control" name="quantityName" value={editedProduct.quantityName} onChange={handleInputChange} /></label>
                 <label>Category: <input className="form-control" name="category" value={editedProduct.category} onChange={handleInputChange} /></label>
                 <label>Image: <input className="form-control" type="file" onChange={handleFileChange} /></label>
               </form>

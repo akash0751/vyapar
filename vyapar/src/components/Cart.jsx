@@ -77,6 +77,12 @@ const Cart = () => {
           filteredItems.map((item, index) => {
             if (!item.product) return null;
 
+            // Get shop stock info (assuming selected shop is the first for now)
+            const shopStock = item.product.shopStocks?.[0]; // You can enhance by saving selectedShopId in cart item
+
+            const isStockExceeded =
+              shopStock && item.quantity > shopStock.quantity;
+
             return (
               <div key={item.product._id || index} className={styles.cartItem}>
                 <img
@@ -86,10 +92,27 @@ const Cart = () => {
                 />
                 <div className={styles.cartItemDetails}>
                   <h3>{item.product.title}</h3>
-                  <p>Quantity: {item.quantity} Kg</p>
+
+                  {/* Shop and Quantity Details */}
+                  {shopStock ? (
+                    <p>
+                      From: <strong>{shopStock.shopName}</strong> | Available:{" "}
+                      <strong>
+                        {shopStock.quantity} {shopStock.unit}
+                      </strong>
+                    </p>
+                  ) : (
+                    <p className={styles.warningText}>No stock info available</p>
+                  )}
+
+                  <p>
+                    Quantity: {item.quantity}{" "}
+                    {shopStock?.unit ? shopStock.unit : ""}
+                  </p>
                   <p>
                     Price: ₹{(item.product.price * item.quantity).toFixed(2)}
                   </p>
+
                   <div className={styles.quantityControls}>
                     <button
                       onClick={() => decreaseQuantity(item.product._id)}
@@ -104,6 +127,14 @@ const Cart = () => {
                       +
                     </button>
                   </div>
+
+                  {isStockExceeded && (
+                    <p className={styles.warningText}>
+                      ⚠️ Only {shopStock.quantity}{" "}
+                      {shopStock.unit || "unit"} available in stock.
+                    </p>
+                  )}
+
                   <button
                     onClick={() => removeFromCart(item.product._id)}
                     className={styles.removeBtn}
