@@ -30,6 +30,11 @@ export const CartProvider = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, []);
   const api = import.meta.env.VITE_API_URL;
 
+  const addToCart = (items) => {
+  dispatch({ type: "SET_CART", payload: items });
+};
+
+
   const fetchCartItemsFromAPI = async () => {
     try {
       const token = localStorage.getItem("token") || localStorage.getItem("authToken");
@@ -74,6 +79,7 @@ export const CartProvider = ({ children }) => {
         increaseQuantity,
         decreaseQuantity,
         removeFromCart,
+        addToCart
       }}
     >
       {children}
