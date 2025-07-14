@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FaSearch, FaSignOutAlt } from "react-icons/fa";
+import { FaSearch, FaSignOutAlt, FaPlus, FaTrash } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import '../styles/AdminAddProduct.css';
@@ -15,8 +15,11 @@ const AdminAddProduct = () => {
     const [category, setCategory] = useState('');
     const [offerDescription, setOfferDescription] = useState('');
     const [description, setDescription] = useState('');
-    const [stock, setStock] = useState('');
     const [image, setImage] = useState(null);
+
+    const [shopStocks, setShopStocks] = useState([
+        { shopName: '', quantity: '', unit: 'kg' }
+    ]);
 
     const [showSuccessToast, setShowSuccessToast] = useState(false);
     const [showErrorToast, setShowErrorToast] = useState(false);
@@ -50,15 +53,6 @@ const AdminAddProduct = () => {
         }
     }, [navigate]);
 
-    const handleKeyDown = (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            if (event.target.id === 'description') {
-                stackRef.current.focus();
-            }
-        }
-    };
-
     const handleLogout = () => {
         localStorage.removeItem("adminToken");
         navigate("/adminloginpage");
@@ -69,14 +63,29 @@ const AdminAddProduct = () => {
         setImage(file);
     };
 
+    const handleShopStockChange = (index, field, value) => {
+        const updated = [...shopStocks];
+        updated[index][field] = value;
+        setShopStocks(updated);
+    };
+
+    const addShopStockField = () => {
+        setShopStocks([...shopStocks, { shopName: '', quantity: '', unit: 'kg' }]);
+    };
+
+    const removeShopStockField = (index) => {
+        const updated = shopStocks.filter((_, i) => i !== index);
+        setShopStocks(updated);
+    };
+
     const resetForm = () => {
         setProductName('');
         setPrice('');
         setCategory('');
         setOfferDescription('');
         setDescription('');
-        setStock('');
         setImage(null);
+        setShopStocks([{ shopName: '', quantity: '', unit: 'kg' }]);
         if (document.getElementById('image')) {
             document.getElementById('image').value = '';
         }
@@ -90,9 +99,9 @@ const AdminAddProduct = () => {
         formData.append("description", description);
         formData.append("category", category);
         formData.append("price", price);
-        formData.append("stock", stock);
         formData.append("offerDescription", offerDescription);
         formData.append("image", image);
+        formData.append("shopStocks", JSON.stringify(shopStocks));
 
         try {
             const response = await adminAxiosInstance.post(
@@ -106,7 +115,7 @@ const AdminAddProduct = () => {
             );
             setToastMessage(response.data.message || "Product added successfully!");
             setShowSuccessToast(true);
-            resetForm(); // Reset form after success
+            resetForm();
         } catch (error) {
             setToastMessage(error.response?.data?.message || "Failed to add product.");
             setShowErrorToast(true);
@@ -191,20 +200,52 @@ const AdminAddProduct = () => {
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            onKeyDown={handleKeyDown}
                             ref={descriptionRef}
                             required
                         ></textarea>
 
-                        <label htmlFor="stock">Stock</label>
-                        <input
-                            type="number"
-                            id="stock"
-                            value={stock}
-                            onChange={(e) => setStock(e.target.value)}
-                            ref={stackRef}
-                            required
-                        />
+                        <label>Stock by Shop</label>
+                        {shopStocks.map((stock, index) => (
+                            <div key={index} className="stock-entry">
+                                <input
+                                    type="text"
+                                    placeholder="Shop Name"
+                                    value={stock.shopName}
+                                    onChange={(e) => handleShopStockChange(index, 'shopName', e.target.value)}
+                                    required
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Quantity"
+                                    value={stock.quantity}
+                                    onChange={(e) => handleShopStockChange(index, 'quantity', e.target.value)}
+                                    required
+                                />
+                                <select
+                                    value={stock.unit}
+                                    onChange={(e) => handleShopStockChange(index, 'unit', e.target.value)}
+                                    required
+                                >
+                                    <option value="kg">kg</option>
+                                    <option value="g">g</option>
+                                    <option value="mg">mg</option>
+                                    <option value="box">box</option>
+                                    <option value="bunch">bunch</option>
+                                    <option value="pack">pack</option>
+                                    <option value="litre">litre</option>
+                                    <option value="ml">ml</option>
+                                    <option value="piece">piece</option>
+                                </select>
+                                {shopStocks.length > 1 && (
+                                    <button type="button" onClick={() => removeShopStockField(index)} className="remove-stock-btn">
+                                        <FaTrash />
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        <button type="button" onClick={addShopStockField} className="add-stock-btn">
+                            <FaPlus /> Add Shop
+                        </button>
 
                         <label htmlFor="image">Product Image</label>
                         <input

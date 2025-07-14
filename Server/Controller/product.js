@@ -1,90 +1,82 @@
-const Product = require('../Model/product')
+const Product = require('../Model/product');
 const path = require('path');
 const fs = require('fs');
 
-
-//Add new product
-
+// Add new product
 const AddProduct = async (req, res) => {
     try {
-        // Check if the user is an admin
         if (req.user.role !== 'admin') {
             return res.status(401).json({ message: 'You are not authorized to perform this action' });
         }
 
-        // Extracting data from the request body
-        const { title, description, category, price, stock,offerDescription } = req.body;
-        const image = req.file;  // Assuming image is uploaded via a file input
+        const { title, description, category, price, offerDescription, shopStocks } = req.body;
+        const image = req.file;
 
-        // Check if the image is provided
         if (!image) {
             return res.status(400).json({ message: 'Please upload an image' });
         }
 
-        // Create a new product with the user who added it
+        // Parse shopStocks if it's sent as a JSON string
+        let parsedShopStocks;
+        try {
+            parsedShopStocks = typeof shopStocks === 'string' ? JSON.parse(shopStocks) : shopStocks;
+        } catch (error) {
+            return res.status(400).json({ message: 'Invalid shopStocks format' });
+        }
+
         const product = await Product.create({
-            title: title,
-            description: description,
-            category: category,
-            price: price,
-            stock: stock,
-            offerDescription: offerDescription,
+            title,
+            description,
+            category,
+            price,
+            offerDescription,
+            shopStocks: parsedShopStocks,
             image: image.filename,
-            user: req.user.id  // Reference the authenticated user who added the product
+            user: req.user.id
         });
 
-        // Return success response
         res.status(201).json({ message: 'Product added successfully', product });
     } catch (error) {
-        // Return error response in case of any issues
         console.error(error);
         res.status(500).json({ message: 'Error occurred while adding the product' });
     }
 };
 
-
-//get product 
+// Get all products
 const GetProduct = async (req, res) => {
     try {
-        const product = await Product.find()
-        
-
-        res.status(200).json({product})
-        console.log(product.image)
-
-    }catch(error){
-        res.status(500).json({message: 'Error Occured'})
+        const product = await Product.find();
+        res.status(200).json({ product });
+    } catch (error) {
+        res.status(500).json({ message: 'Error Occurred' });
     }
-}
+};
 
-//get product by id
+// Get product by ID
 const GetProductById = async (req, res) => {
     try {
-        const id = req.params.id
-        const product = await Product.findById(id)
-        if(!product){
-            return res.status(404).json({message:'Product not found'})
-            }
-            res.status(200).json({product})
-    }catch{
-        res.status(500).json({message: 'Error Occured'})
-    }
-}
-
-// update product
-const UpdateProduct = async (req, res) => {
-     try {
         const id = req.params.id;
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+        res.status(200).json({ product });
+    } catch (error) {
+        res.status(500).json({ message: 'Error Occurred' });
+    }
+};
 
-        // Role check
+// Update product
+const UpdateProduct = async (req, res) => {
+    try {
+        const id = req.params.id;
         if (req.user.role !== 'admin') {
             return res.status(401).json({ message: 'You are not authorized to perform this action' });
         }
 
-        const { title, description, category, price, stock ,offerDescription} = req.body;
+        const { title, description, category, price, offerDescription, shopStocks } = req.body;
         const image = req.file;
 
-        // Find existing product
         const product = await Product.findById(id);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
@@ -95,17 +87,24 @@ const UpdateProduct = async (req, res) => {
         if (description) product.description = description;
         if (category) product.category = category;
         if (price) product.price = price;
-        if (stock) product.stock = stock;
-        if(offerDescription) product.offerDescription = offerDescription;
-        if (image) product.image = `/uploads/${image.filename}`;
+        if (offerDescription) product.offerDescription = offerDescription;
 
-        // Save updated product
+        // Handle shopStocks
+        if (shopStocks) {
+            try {
+                product.shopStocks = typeof shopStocks === 'string' ? JSON.parse(shopStocks) : shopStocks;
+            } catch (error) {
+                return res.status(400).json({ message: 'Invalid shopStocks format' });
+            }
+        }
+
+        // Update image
+        if (image) {
+            product.image = image.filename;
+        }
+
         const updatedProduct = await product.save();
-
-        res.status(200).json({
-            message: 'Product updated successfully',
-            product: updatedProduct,
-        });
+        res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
 
     } catch (error) {
         console.error("UpdateProduct error:", error);
@@ -113,26 +112,22 @@ const UpdateProduct = async (req, res) => {
     }
 };
 
-
-//delete product
+// Delete product
 const DeleteProduct = async (req, res) => {
     try {
         const id = req.params.id;
-
-        // Role check
         if (req.user.role !== 'admin') {
             return res.status(401).json({ message: 'You are not authorized to perform this action' });
         }
 
-        // Find the product
         const product = await Product.findByIdAndDelete(id);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Delete the image file from the uploads folder
+        // Delete image file if exists
         if (product.image) {
-            const imagePath = path.join(__dirname, '..', product.image); // Adjust path if needed
+            const imagePath = path.join(__dirname, '..', 'uploads', product.image);
             fs.unlink(imagePath, (err) => {
                 if (err) {
                     console.error('Error deleting image file:', err);
@@ -143,11 +138,16 @@ const DeleteProduct = async (req, res) => {
         }
 
         res.status(200).json({ message: 'Product deleted successfully' });
-
     } catch (error) {
         console.error('Error deleting product:', error);
         res.status(500).json({ message: 'Error occurred during deletion' });
     }
 };
 
-module.exports ={AddProduct,GetProduct,GetProductById,UpdateProduct,DeleteProduct};
+module.exports = {
+    AddProduct,
+    GetProduct,
+    GetProductById,
+    UpdateProduct,
+    DeleteProduct
+};
