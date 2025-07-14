@@ -9,9 +9,10 @@ import {
   FaTrash
 } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+
 import { jwtDecode } from 'jwt-decode';
 import '../styles/Profile.css';
+import axiosInstance from '../utils/axiosInstance';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const api = import.meta.env.VITE_API_URL
         const id = decoded.id || decoded._id;
         setUserId(id);
 
-        const res = await axios.get(`${api}/api/getByIdAddress/${id}`);
+        const res = await axiosInstance.get(`${api}/api/getByIdAddress/${id}`);
         setAddresses(res.data);
       } catch (error) {
         console.error('Failed to fetch addresses', error);
@@ -62,7 +63,7 @@ const api = import.meta.env.VITE_API_URL
       const decoded = jwtDecode(token);
       const userId = decoded.id || decoded._id;
 
-      const res = await axios.post(
+      const res = await axiosInstance.post(
         `${api}/api/addAddress`,
         { ...newAddress, user: userId },
         {
@@ -99,7 +100,7 @@ const api = import.meta.env.VITE_API_URL
 
   const handleUpdateAddress = async () => {
     try {
-      const res = await axios.put(
+      const res = await axiosInstance.put(
         `${api}/api/putAddress/${userId}`,
         newAddress,
         {
@@ -132,7 +133,7 @@ const api = import.meta.env.VITE_API_URL
 
   const handleDeleteAddress = async (addressId) => {
     try {
-      await axios.delete(`${api}/api/deleteAddress/${addressId}`, {
+      await axiosInstance.delete(`${api}/api/deleteAddress/${addressId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
