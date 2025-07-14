@@ -1,60 +1,81 @@
 import React, { createContext, useReducer, useContext } from "react";
+import axios from "axios";
 
 const CartContext = createContext();
 
 const cartReducer = (state, action) => {
   switch (action.type) {
-    case "ADD_TO_CART":
-      const existingItem = state.find(item => item.id === action.product.id);
-      if (existingItem) {
-        return state.map(item =>
-          item.id === action.product.id
-            ? { ...item, quantity: item.quantity + action.product.quantity }
-            : item
-        );
-      } else {
-        return [...state, action.product];
-      }
+    case "SET_CART":
+      return action.payload;
     case "INCREASE_QUANTITY":
       return state.map(item =>
-        item.id === action.id
+        item.product._id === action.id
           ? { ...item, quantity: item.quantity + 1 }
           : item
       );
     case "DECREASE_QUANTITY":
       return state.map(item =>
-        item.id === action.id
-          ? { ...item, quantity: item.quantity - 1 > 0 ? item.quantity - 1 : 1 }
+        item.product._id === action.id
+          ? { ...item, quantity: item.quantity > 1 ? item.quantity - 1 : 1 }
           : item
       );
     case "REMOVE_FROM_CART":
-      return state.filter(item => item.id !== action.id);
+      return state.filter(item => item.product._id !== action.id);
     default:
       return state;
   }
 };
 
 export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, []);
+  const [cart, dispatch] = useReducer(cartReducer, []);
+  const api = import.meta.env.VITE_API_URL;
 
-  const addToCart = product => {
-    dispatch({ type: "ADD_TO_CART", product });
+  const fetchCartItemsFromAPI = async () => {
+    try {
+      const token = localStorage.getItem("token") || localStorage.getItem("authToken");
+      const response = await axios.get(`${api}/api/cart`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      dispatch({ type: "SET_CART", payload: response.data.items });
+    } catch (err) {
+      console.error("Error fetching cart:", err);
+    }
   };
 
-  const increaseQuantity = id => {
+  const increaseQuantity = async (id) => {
     dispatch({ type: "INCREASE_QUANTITY", id });
+    // Optionally update on backend here
   };
 
-  const decreaseQuantity = id => {
+  const decreaseQuantity = async (id) => {
     dispatch({ type: "DECREASE_QUANTITY", id });
+    // Optionally update on backend here
   };
 
-  const removeFromCart = id => {
-    dispatch({ type: "REMOVE_FROM_CART", id });
+  const removeFromCart = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${api}/api/remove/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchCartItemsFromAPI();
+    } catch (err) {
+      console.error("Error removing item:", err);
+    }
   };
 
   return (
-    <CartContext.Provider value={{ cart: state, addToCart, increaseQuantity, decreaseQuantity, removeFromCart }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        fetchCartItemsFromAPI,
+        increaseQuantity,
+        decreaseQuantity,
+        removeFromCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
