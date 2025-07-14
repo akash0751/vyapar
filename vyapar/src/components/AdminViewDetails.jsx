@@ -15,7 +15,7 @@ const AdminViewDetails = () => {
             <header className={styles.header}>
                 {/* Navbar */}
                 <nav className={styles.navbar}>
-                    <div className={styles.navbarBrand}>Vyapar / Admin</div>
+                    <div className={styles.navbarBrand}>CORE FOUR / Admin</div>
                     <div className={styles.navbarSearch}>
                         <input type="text" placeholder="Search for products, orders, users..." className={styles.searchInput} />
                         <FaSearch className={styles.searchIcon} />

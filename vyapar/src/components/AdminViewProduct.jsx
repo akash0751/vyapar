@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { FaSearch, FaSignOutAlt } from "react-icons/fa";
 import '../styles/AdminViewProduct.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import adminAxiosInstance from '../utils/adminAxiosInstance';
 
 const AdminViewProduct = () => {
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ const AdminViewProduct = () => {
 
   const fetchProducts = async (token) => {
     try {
-      const res = await adminAxiosInstance.get(`${api}/api/products`, {
+      const res = await axios.get(`${api}/api/products`, {
         headers: { "authorization": `Bearer ${token}` }
       });
       setProducts(res.data.product);
@@ -96,7 +96,7 @@ const AdminViewProduct = () => {
         if (value !== null) formData.append(key, value);
       });
 
-      await adminAxiosInstance.put(`${api}/api/updateProduct/${editingProductId}`, formData, {
+      await axios.put(`${api}/api/updateProduct/${editingProductId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           "authorization": `Bearer ${token}`
@@ -131,7 +131,7 @@ const AdminViewProduct = () => {
     if (!confirmDelete) return;
 
     try {
-      await adminAxiosInstance.delete(`${api}/api/deleteProduct/${id}`, {
+      await axios.delete(`${api}/api/deleteProduct/${id}`, {
         headers: { "authorization": `Bearer ${token}` }
       });
       fetchProducts(token);
@@ -149,7 +149,7 @@ const AdminViewProduct = () => {
 
       <header>
         <nav className="navbar">
-          <div className="navbar-brand">Vyapar / Admin</div>
+          <div className="navbar-brand">CORE FOUR / Admin</div>
           <div className="navbar-search">
             <input type="text" placeholder="Search..." className="search-input" />
             <FaSearch className="search-icon" />

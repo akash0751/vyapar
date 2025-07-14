@@ -1,37 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
-import { FaSearch, FaShoppingCart, FaBell, FaUserCircle, FaHome } from "react-icons/fa";
+import {
+  FaSearch,
+  FaShoppingCart,
+  FaBell,
+  FaUserCircle,
+  FaHome,
+} from "react-icons/fa";
 import styles from "./Cart.module.css";
-import axiosInstance from "../utils/axiosInstance";
-
+import { useCart } from "../context/CartContext";
 
 const Cart = () => {
-  const { increaseQuantity, decreaseQuantity } = useCart();
+  const {
+    cart,
+    increaseQuantity,
+    decreaseQuantity,
+    removeFromCart,
+    fetchCartItemsFromAPI,
+  } = useCart();
   const navigate = useNavigate();
-  const [items, setCartItems] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // 🔍 search state
+  const [searchQuery, setSearchQuery] = useState("");
   const api = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const fetchCartItems = async () => {
-      try {
-        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-        const response = await axiosInstance.get(`${api}/api/cart`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setCartItems(response.data.items);
-      } catch (error) {
-        console.error("Error fetching cart items:", error);
-      }
-    };
-    fetchCartItems();
+    fetchCartItemsFromAPI();
   }, []);
 
+  const filteredItems = searchQuery
+    ? cart.filter((item) =>
+        item.product?.title
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    : cart;
+
   const calculateTotal = () => {
-    return filteredItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    return filteredItems.reduce(
+      (total, item) => total + item.product.price * item.quantity,
+      0
+    );
   };
 
   const handleCheckout = () => {
@@ -42,39 +49,11 @@ const Cart = () => {
     navigate("/");
   };
 
-  const handleRemoveFromCart = async (productId) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axiosInstance.delete(`${api}/api/remove/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      const response = await axiosInstance.get(`${api}/api/cart`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      setCartItems(response.data.items);
-    } catch (error) {
-      console.error("Error removing item from cart:", error);
-    }
-  };
-
-  // 🔍 Filtered items based on search query
-  const filteredItems = searchQuery
-    ? items.filter(item =>
-        item.product?.title?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : items;
-
   return (
     <div className={styles.container}>
       {/* Navbar */}
       <nav className="navbar">
-        <div className="navbar-brand">Vyapar</div>
+        <div className="navbar-brand">CORE FOUR</div>
         <div className="navbar-search">
           <input
             type="text"
@@ -108,7 +87,9 @@ const Cart = () => {
                 <div className={styles.cartItemDetails}>
                   <h3>{item.product.title}</h3>
                   <p>Quantity: {item.quantity} Kg</p>
-                  <p>Price: ₹{(item.product.price * item.quantity).toFixed(2)}</p>
+                  <p>
+                    Price: ₹{(item.product.price * item.quantity).toFixed(2)}
+                  </p>
                   <div className={styles.quantityControls}>
                     <button
                       onClick={() => decreaseQuantity(item.product._id)}
@@ -124,7 +105,7 @@ const Cart = () => {
                     </button>
                   </div>
                   <button
-                    onClick={() => handleRemoveFromCart(item.product._id)}
+                    onClick={() => removeFromCart(item.product._id)}
                     className={styles.removeBtn}
                   >
                     Remove
@@ -146,7 +127,10 @@ const Cart = () => {
           <p>Shipping: ₹8.00</p>
           <p>Tax: ₹0.72</p>
           <p>Total: ₹{(calculateTotal() + 8.0 + 0.72).toFixed(2)}</p>
-          <button onClick={handlePurchaseMore} className={styles.purchaseMoreBtn}>
+          <button
+            onClick={handlePurchaseMore}
+            className={styles.purchaseMoreBtn}
+          >
             Purchase More
           </button>
           <button onClick={handleCheckout} className={styles.checkoutBtn}>

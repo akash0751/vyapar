@@ -54,11 +54,11 @@ const ForgotOTP = ({ email }) => {
       <div className="otp-box">
         <div className="brand">
           <img
-            src="https://play-lh.googleusercontent.com/0Oxj5yd5rYDqofo_zYwzlKFnZcaSN51LuO4mrIPLDnj6rSMkGgKklLDtzZRPCdq7wyLM"
-            alt="Vyapar Logo"
+            src="/corefour.jpeg"
+            alt="CORE FOUR Logo"
             className="logo"
           />
-          <h2 className="brand-name">Vyapar</h2>
+          <h2 className="brand-name">CORE FOUR</h2>
         </div>
         <div className="otp-header">
           <p className="otp-message">

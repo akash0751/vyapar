@@ -41,8 +41,8 @@ const api = import.meta.env.VITE_API_URL
         {/* Brand Section with Logo and Name */}
         <div className="brand text-center mb-4">
           <img
-            src="https://play-lh.googleusercontent.com/0Oxj5yd5rYDqofo_zYwzlKFnZcaSN51LuO4mrIPLDnj6rSMkGgKklLDtzZRPCdq7wyLM"
-            alt="Vyapar Logo"
+            src="/corefour.jpeg"
+            alt="CORE FOUR Logo"
             className="logo mb-2"
             style={{ width: "50px", height: "50px" }} // Adjust logo size
           />
@@ -50,7 +50,7 @@ const api = import.meta.env.VITE_API_URL
             className="brand-name"
             style={{ fontWeight: "bold", fontSize: "1.75rem" }}
           >
-            Vyapar
+            CORE FOUR
           </h2>
         </div>
 

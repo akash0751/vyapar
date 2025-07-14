@@ -1,8 +1,8 @@
 import { FaUserCircle, FaShoppingCart, FaBell, FaHome } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import '../styles/Home.css';
-import axiosInstance from "../utils/axiosInstance";
 
 const Home = () => {
   const [category, setCategory] = useState("fruits");
@@ -16,7 +16,7 @@ const Home = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axiosInstance.get(`${api}/api/products`);
+        const res = await axios.get(`${api}/api/products`);
         console.log(res.data.product);
         setProducts(res.data.product);
       } catch (error) {
@@ -62,7 +62,7 @@ const Home = () => {
     <div className="home-container">
       {/* Navbar */}
       <nav className="navbar">
-        <div className="navbar-brand">Vyapar</div>
+        <div className="navbar-brand">CORE FOUR</div>
         <div className="navbar-search">
           <input
             type="text"

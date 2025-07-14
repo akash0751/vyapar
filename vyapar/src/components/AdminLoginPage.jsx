@@ -83,11 +83,11 @@ const AdminLoginPage = () => {
         <div className="right-section">
           <div className="brand">
             <img
-              src="https://play-lh.googleusercontent.com/0Oxj5yd5rYDqofo_zYwzlKFnZcaSN51LuO4mrIPLDnj6rSMkGgKklLDtzZRPCdq7wyLM"
-              alt="Vyapar Logo"
+              src="/corefour.jpeg"
+              alt="CORE FOUR Logo"
               className="logo"
             />
-            <h2 className="brand-name">Vyapar / Admin</h2>
+            <h2 className="brand-name">CORE FOUR / Admin</h2>
           </div>
 
           <h2 className="welcome-title">Welcome Back</h2>

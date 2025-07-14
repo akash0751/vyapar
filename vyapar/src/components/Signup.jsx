@@ -31,7 +31,7 @@ const Signup = () => {
       );
 
       if (response.status === 200) {
-        localStorage.setItem("tempToken", response.data.tempToken);
+        localStorage.setItem("tempToken", response.data.token);
         alert("OTP sent to your email");
         navigate("/OtpVerificationPage");
       }
@@ -77,11 +77,11 @@ const Signup = () => {
         <div className="right-section">
           <div className="brand">
             <img
-              src="https://play-lh.googleusercontent.com/0Oxj5yd5rYDqofo_zYwzlKFnZcaSN51LuO4mrIPLDnj6rSMkGgKklLDtzZRPCdq7wyLM"
-              alt="Vyapar Logo"
+              src="/corefour.jpeg"
+              alt="CORE FOUR Logo"
               className="logo"
             />
-            <h2 className="brand-name">Vyapar</h2>
+            <h2 className="brand-name">CORE FOUR</h2>
           </div>
           <h2 className="welcome-title">Create Your Account</h2>
           <p className="welcome-subtitle">Please sign up to get started</p>
@@ -135,6 +135,16 @@ const Signup = () => {
               }}
             />
           </div>
+
+          {/* Optional Apple Sign Up */}
+          <button className="btn apple-button w-100 mb-3">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
+              alt="Apple Logo"
+              className="social-icon"
+            />
+            Sign up with Apple
+          </button>
 
           <p className="login-link">
             Already have an account?{" "}

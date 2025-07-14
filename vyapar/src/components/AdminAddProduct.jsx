@@ -2,8 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { FaSearch, FaSignOutAlt } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
 import '../styles/AdminAddProduct.css';
-import adminAxiosInstance from '../utils/adminAxiosInstance';
 
 const AdminAddProduct = () => {
     const descriptionRef = useRef(null);
@@ -95,7 +95,7 @@ const AdminAddProduct = () => {
         formData.append("image", image);
 
         try {
-            const response = await adminAxiosInstance.post(
+            const response = await axios.post(
                 `${api}/api/addProduct`,
                 formData,
                 {
@@ -123,7 +123,7 @@ const AdminAddProduct = () => {
 
             <header>
                 <nav className="navbar">
-                    <div className="navbar-brand">Vyapar / Admin</div>
+                    <div className="navbar-brand">CORE FOUR / Admin</div>
                     <div className="navbar-search">
                         <input type="text" placeholder="Search for grocery, vegetables, spices..." className="search-input" />
                         <FaSearch className="search-icon" />

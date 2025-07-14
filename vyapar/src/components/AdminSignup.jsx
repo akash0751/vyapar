@@ -54,7 +54,7 @@ const AdminSignup = () => {
         <div className="left-section">
           <h1 className="title">Admin Control at Your Fingertips</h1>
           <p className="subtitle">
-            Manage your marketplace with ease and security using Vyapar Admin.
+            Manage your marketplace with ease and security using CORE FOUR Admin.
           </p>
           <img
             src="https://i.pinimg.com/736x/c0/22/f7/c022f70d3ede6216f171aeac5efb1e1b.jpg"
@@ -66,11 +66,11 @@ const AdminSignup = () => {
         <div className="right-section">
           <div className="brand">
             <img
-              src="https://play-lh.googleusercontent.com/0Oxj5yd5rYDqofo_zYwzlKFnZcaSN51LuO4mrIPLDnj6rSMkGgKklLDtzZRPCdq7wyLM"
-              alt="Vyapar Logo"
+              src="/corefour.jpeg"
+              alt="CORE FOUR Logo"
               className="logo"
             />
-            <h2 className="brand-name">Vyapar / Admin</h2>
+            <h2 className="brand-name">CORE FOUR / Admin</h2>
           </div>
 
           <h2 className="welcome-title">Register as Admin</h2>

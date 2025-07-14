@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Details.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import axiosInstance from "../utils/axiosInstance";
+import axios from "axios";
 
 
 const Details = () => {
@@ -49,7 +49,7 @@ const Details = () => {
         return;
       }
 
-      const res = await axiosInstance.post(
+      const res = await axios.post(
         `${api}/api/addAddress`,
         formData,
         {

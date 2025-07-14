@@ -1,182 +1,98 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
+import React, { useState } from "react";
 import axios from "axios";
-import "../styles/LoginPage.css";
+import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../styles/OtpVerificationPage.css";
 
-const LoginPage = () => {
+const ForgotOTP = ({ email }) => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [showErrorPopup, setShowErrorPopup] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const api = import.meta.env.VITE_API_URL;
-
-  const handleLogin = async (e) => {
+  const [otp, setOtp] = useState("");
+  const api = import.meta.env.VITE_API_URL
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setShowErrorPopup(false);
-
-    try {
-      const response = await axios.post(`${api}/api/login`, {
-        email,
-        password,
-      });
-
-      const token = response.data.token;
-      if (token) {
-        localStorage.setItem("token", token);
-        setShowSuccessPopup(true);
-
-        setTimeout(() => {
-          const toast = document.querySelector(".success-toast");
-          if (toast) toast.classList.add("fade-out");
-        }, 1200);
-
-        setTimeout(() => {
-          setShowSuccessPopup(false);
-          navigate("/");
-        }, 1800);
-      }
-    } catch (error) {
-      const msg = error.response?.data?.message || "Login failed.";
-      setErrorMessage(msg);
-      setShowErrorPopup(true);
-
-      setTimeout(() => {
-        const toast = document.querySelector(".error-toast");
-        if (toast) toast.classList.add("fade-out");
-      }, 1500);
-
-      setTimeout(() => {
-        setShowErrorPopup(false);
-      }, 2000);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async (credentialResponse) => {
-    try {
-      const { credential } = credentialResponse;
-      const response = await axios.post(`${api}/api/google-login`, {
-        token: credential,
-      });
-
-      const token = response.data.token;
-      if (token) {
-        localStorage.setItem("token", token);
-        setShowSuccessPopup(true);
-
-        setTimeout(() => {
-          setShowSuccessPopup(false);
-          navigate("/");
-        }, 1500);
-      }
-    } catch (err) {
-      console.error("Google login failed", err);
-      setErrorMessage("Google login failed.");
-      setShowErrorPopup(true);
-    }
-  };
-
-  const handleForgotPassword = () => {
-    if (!email) {
-      alert("Please enter your email first.");
+    const token = localStorage.getItem("resetToken"); // token received from /forgotPassword
+  
+    if (!token) {
+      alert("Temporary token not found.");
       return;
     }
-    localStorage.setItem("resetEmail", email);
-    navigate("/email");
+  
+    // Manually set the token in a cookie before making the request
+    document.cookie = `jwt_otp=${token}; path=/;`;
+  
+    try {
+      const response = await axios.post(
+        `${api}/api/verifyOtp`,
+        { otp: Number(otp) },
+        { withCredentials: true }
+      );
+  
+      if (response.status === 200) {
+        alert("OTP Verified Successfully!");
+        localStorage.setItem("finalToken", response.data.token);
+        navigate("/SetNewPasswordPage");
+      }
+    } catch{
+      alert("Invalid or expired OTP");
+    }
+  };
+  
+
+  const handleResendOtp = async () => {
+    try {
+      const response = await axios.post(`${api}/api/verifyUser`);
+      if (response.status === 200) {
+        alert("A new OTP has been sent!");
+      }
+    } catch{
+      alert("Failed to resend OTP");
+    }
   };
 
   return (
-    <div className="login-container">
-      {showSuccessPopup && (
-        <div className="success-toast">Login Successful 🎉 Redirecting...</div>
-      )}
-      {showErrorPopup && (
-        <div className="error-toast">❌ {errorMessage}</div>
-      )}
-
-      <div className="login-box">
-        <div className="left-section">
-          <h1 className="title">Simplify management with our dashboard.</h1>
-          <p className="subtitle">
-            Simplify your e-commerce management with our user-friendly admin dashboard.
-          </p>
+    <div className="otp-container">
+      <div className="otp-box">
+        <div className="brand">
           <img
-            src="https://i.pinimg.com/736x/c0/22/f7/c022f70d3ede6216f171aeac5efb1e1b.jpg"
-            alt="Illustration"
-            className="illustration"
+            src="/corefour.jpeg"
+            alt="CORE FOUR Logo"
+            className="logo"
           />
+          <h2 className="brand-name">CORE FOUR</h2>
         </div>
-
-        <div className="right-section">
-          <div className="brand">
-            <img
-              src="https://play-lh.googleusercontent.com/0Oxj5yd5rYDqofo_zYwzlKFnZcaSN51LuO4mrIPLDnj6rSMkGgKklLDtzZRPCdq7wyLM"
-              alt="Vyapar Logo"
-              className="logo"
-            />
-            <h2 className="brand-name">Vyapar</h2>
-          </div>
-          <h2 className="welcome-title">Welcome Back</h2>
-          <p className="welcome-subtitle">Please login to your account</p>
-
-          <form className="login-form" onSubmit={handleLogin}>
+        <div className="otp-header">
+          <p className="otp-message">
+            You will receive an email with a verification code within 5 minutes
+          </p>
+          {/* Only show email if it's provided */}
+          {email && <p className="otp-phone">{email}</p>}
+        </div>
+        <div className="otp-input-section">
+          <p className="otp-instruction">Enter the OTP you received in your email</p>
+          <form className="otp-form" onSubmit={handleVerifyOtp}>
             <input
-              type="email"
-              placeholder="Email"
+              type="text"
+              placeholder="Enter OTP"
+              className="otp-input"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
               required
-              className="input-field mb-2"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
             />
-            <input
-              type="password"
-              placeholder="Password"
-              required
-              className="input-field mb-2"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button className="signin-button" type="submit" disabled={loading}>
-              {loading ? "Logging in..." : "Login"}
+            <button type="submit" className="verify-button">
+              Submit
             </button>
           </form>
-
-          <div className="divider">OR</div>
-
-          {/* ✅ Google Login Button */}
-          <div className="google-login-wrapper">
-            <GoogleLogin
-              onSuccess={handleGoogleLogin}
-              onError={() => {
-                setErrorMessage("Google Sign In failed");
-                setShowErrorPopup(true);
-              }}
-            />
-          </div>
-
-
-          <p className="forgot-password">
-            <button className="btn btn-link" onClick={handleForgotPassword}>
-              Forgot Password?
-            </button>
-          </p>
-          <p className="login-link">
-            Create new account{" "}
-            <span onClick={() => navigate("/register")} style={{ cursor: "pointer" }}>
-              Sign up
-            </span>
-          </p>
+          <button
+            type="button"
+            className="resend-button"
+            onClick={handleResendOtp}
+          >
+            Click here to resend OTP
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default ForgotOTP;

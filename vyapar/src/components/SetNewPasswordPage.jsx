@@ -50,11 +50,11 @@ const api = import.meta.env.VITE_API_URL
       <div className="set-password-box">
         <div className="brand">
           <img
-            src="https://play-lh.googleusercontent.com/0Oxj5yd5rYDqofo_zYwzlKFnZcaSN51LuO4mrIPLDnj6rSMkGgKklLDtzZRPCdq7wyLM"
-            alt="Vyapar Logo"
+            src="/corefour.jpeg"
+            alt="CORE FOUR Logo"
             className="logo"
           />
-          <h2 className="brand-name">Vyapar</h2>
+          <h2 className="brand-name">CORE FOUR</h2>
         </div>
         <h2 className="set-password-title">Set New Password</h2>
         <form className="set-password-form" onSubmit={handleSetPassword}>

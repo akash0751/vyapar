@@ -23,7 +23,7 @@ const AdminHome = () => {
     <div className="home-container">
       <header>
         <nav className="navbar">
-          <div className="navbar-brand">Vyapar / Admin</div>
+          <div className="navbar-brand">CORE FOUR / Admin</div>
           <div className="navbar-search">
             <input type="text" placeholder="Search for grocery, vegetables, spices..." className="search-input" />
             <FaSearch className="search-icon" />
