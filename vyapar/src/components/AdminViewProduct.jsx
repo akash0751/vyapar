@@ -12,22 +12,21 @@ const AdminViewProduct = () => {
   const [editingProductId, setEditingProductId] = useState(null);
   const [editedProduct, setEditedProduct] = useState({
     title: '', description: '', price: '', offerDescription: '', category: '',
-    unit: '', shopName: '', quantityName: '', image: null
+    image: null,
+    shopStocks: [],
   });
 
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const modalRef = useRef(null);
-
   const api = import.meta.env.VITE_API_URL;
 
   const showToast = (message, type = "success") => {
     setToastMessage(message);
     type === "success" ? setShowSuccessToast(true) : setShowErrorToast(true);
     setTimeout(() => {
-      if (type === "success") setShowSuccessToast(false);
-      else setShowErrorToast(false);
+      type === "success" ? setShowSuccessToast(false) : setShowErrorToast(false);
     }, 2000);
   };
 
@@ -38,7 +37,6 @@ const AdminViewProduct = () => {
       navigate("/");
       return;
     }
-
     try {
       const decoded = jwtDecode(token);
       if (decoded.role !== "admin") {
@@ -72,7 +70,6 @@ const AdminViewProduct = () => {
   const handleEditClick = async (product) => {
     setEditedProduct({ ...product, image: null });
     setEditingProductId(product._id);
-
     const bootstrap = await import('bootstrap/dist/js/bootstrap.bundle.min.js');
     const modal = new bootstrap.Modal(modalRef.current);
     modal.show();
@@ -81,6 +78,12 @@ const AdminViewProduct = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditedProduct((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleStockChange = (index, field, value) => {
+    const updatedStocks = [...editedProduct.shopStocks];
+    updatedStocks[index][field] = value;
+    setEditedProduct((prev) => ({ ...prev, shopStocks: updatedStocks }));
   };
 
   const handleFileChange = (e) => {
@@ -92,7 +95,11 @@ const AdminViewProduct = () => {
     try {
       const formData = new FormData();
       Object.entries(editedProduct).forEach(([key, value]) => {
-        if (value !== null) formData.append(key, value);
+        if (key === 'shopStocks') {
+          formData.append('shopStocks', JSON.stringify(value));
+        } else if (value !== null) {
+          formData.append(key, value);
+        }
       });
 
       await adminAxiosInstance.put(`${api}/api/updateProduct/${editingProductId}`, formData, {
@@ -104,8 +111,7 @@ const AdminViewProduct = () => {
 
       setEditingProductId(null);
       setEditedProduct({
-        title: '', description: '', price: '', offerDescription: '', category: '',
-        unit: '', shopName: '', quantityName: '', image: null
+        title: '', description: '', price: '', offerDescription: '', category: '', image: null, shopStocks: []
       });
 
       const bootstrap = await import('bootstrap/dist/js/bootstrap.bundle.min.js');
@@ -129,9 +135,7 @@ const AdminViewProduct = () => {
 
   const handleDeleteClick = async (id) => {
     const token = localStorage.getItem("adminToken");
-    const confirmDelete = window.confirm("Are you sure you want to delete this product?");
-    if (!confirmDelete) return;
-
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
       await adminAxiosInstance.delete(`${api}/api/deleteProduct/${id}`, {
         headers: { "authorization": `Bearer ${token}` }
@@ -167,8 +171,6 @@ const AdminViewProduct = () => {
           <ul>
             <li><Link to="/adminproduct">Add products</Link></li>
             <li><Link to="/adminview">View product</Link></li>
-            <li><a href="#">View details</a></li>
-            <li><a href="#">Sales graph</a></li>
           </ul>
         </aside>
 
@@ -182,9 +184,6 @@ const AdminViewProduct = () => {
                 <th>Price</th>
                 <th>Offer</th>
                 <th>Stock (All Shops)</th>
-                <th>Unit</th>
-                <th>Shop</th>
-                <th>Quantity Name</th>
                 <th>Category</th>
                 <th>Image</th>
                 <th>Actions</th>
@@ -210,9 +209,6 @@ const AdminViewProduct = () => {
                       "-"
                     )}
                   </td>
-                  <td>{product.unit || '-'}</td>
-                  <td>{product.shopName || '-'}</td>
-                  <td>{product.quantityName || '-'}</td>
                   <td>{product.category}</td>
                   <td><img src={`${api}/uploads/${product.image}`} alt={product.title} width="50" /></td>
                   <td>
@@ -228,7 +224,7 @@ const AdminViewProduct = () => {
 
       {/* Edit Modal */}
       <div className="modal fade" ref={modalRef} tabIndex="-1">
-        <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-dialog modal-dialog-centered modal-lg">
           <div className="modal-content">
             <div className="modal-header bg-primary text-white">
               <h5 className="modal-title">Edit Product</h5>
@@ -240,11 +236,39 @@ const AdminViewProduct = () => {
                 <label>Description: <input className="form-control" name="description" value={editedProduct.description} onChange={handleInputChange} /></label>
                 <label>Price: <input className="form-control" type="number" name="price" value={editedProduct.price} onChange={handleInputChange} /></label>
                 <label>Offer: <input className="form-control" name="offerDescription" value={editedProduct.offerDescription} onChange={handleInputChange} /></label>
-                <label>Unit: <input className="form-control" name="unit" value={editedProduct.unit} onChange={handleInputChange} /></label>
-                <label>Shop Name: <input className="form-control" name="shopName" value={editedProduct.shopName} onChange={handleInputChange} /></label>
-                <label>Quantity Name: <input className="form-control" name="quantityName" value={editedProduct.quantityName} onChange={handleInputChange} /></label>
                 <label>Category: <input className="form-control" name="category" value={editedProduct.category} onChange={handleInputChange} /></label>
                 <label>Image: <input className="form-control" type="file" onChange={handleFileChange} /></label>
+
+                <h6 className="mt-3">Shop Stocks</h6>
+                {editedProduct.shopStocks?.map((stock, index) => (
+                  <div key={index} className="row mb-2">
+                    <div className="col">
+                      <input
+                        className="form-control"
+                        placeholder="Shop Name"
+                        value={stock.shopName}
+                        onChange={(e) => handleStockChange(index, 'shopName', e.target.value)}
+                      />
+                    </div>
+                    <div className="col">
+                      <input
+                        className="form-control"
+                        type="number"
+                        placeholder="Quantity"
+                        value={stock.quantity}
+                        onChange={(e) => handleStockChange(index, 'quantity', e.target.value)}
+                      />
+                    </div>
+                    <div className="col">
+                      <input
+                        className="form-control"
+                        placeholder="Unit"
+                        value={stock.unit}
+                        onChange={(e) => handleStockChange(index, 'unit', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
               </form>
             </div>
             <div className="modal-footer">
