@@ -100,7 +100,10 @@ const AdminAddProduct = () => {
         formData.append("category", category);
         formData.append("price", price);
         formData.append("offerDescription", offerDescription);
-        formData.append("image", image);
+        if (image) {
+  formData.append("image", image);
+}
+
         formData.append("shopStocks", JSON.stringify(shopStocks));
 
         try {
