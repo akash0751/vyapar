@@ -135,7 +135,7 @@ const Product = () => {
                 >
                   {product.shopStocks.map((stock, index) => (
                     <option key={index} value={index}>
-                      {stock.shopName} - {stock.quantity} {stock.unit}
+                      {stock.shopName}
                     </option>
                   ))}
                 </select>
