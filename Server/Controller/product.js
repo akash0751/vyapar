@@ -12,9 +12,7 @@ const AddProduct = async (req, res) => {
         const { title, description, category, price, offerDescription, shopStocks } = req.body;
         const image = req.file;
 
-        if (!image) {
-            return res.status(400).json({ message: 'Please upload an image' });
-        }
+        
 
         // Parse shopStocks if it's sent as a JSON string
         let parsedShopStocks;
