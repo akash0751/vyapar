@@ -208,3 +208,12 @@ body {
   background-color: #dc3545;
   color: #fff;
 }
+.stock-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  font-size: 0.85rem;
+}
+.stock-list li {
+  margin-bottom: 2px;
+}

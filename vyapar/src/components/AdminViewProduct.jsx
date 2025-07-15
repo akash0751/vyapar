@@ -12,7 +12,7 @@ const AdminViewProduct = () => {
   const [editingProductId, setEditingProductId] = useState(null);
   const [editedProduct, setEditedProduct] = useState({
     title: '', description: '', price: '', offerDescription: '', category: '',
-    stock: '', unit: '', shopName: '', quantityName: '', image: null
+    unit: '', shopName: '', quantityName: '', image: null
   });
 
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -105,7 +105,7 @@ const AdminViewProduct = () => {
       setEditingProductId(null);
       setEditedProduct({
         title: '', description: '', price: '', offerDescription: '', category: '',
-        stock: '', unit: '', shopName: '', quantityName: '', image: null
+        unit: '', shopName: '', quantityName: '', image: null
       });
 
       const bootstrap = await import('bootstrap/dist/js/bootstrap.bundle.min.js');
@@ -181,7 +181,7 @@ const AdminViewProduct = () => {
                 <th>Description</th>
                 <th>Price</th>
                 <th>Offer</th>
-                <th>Stock</th>
+                <th>Stock (All Shops)</th>
                 <th>Unit</th>
                 <th>Shop</th>
                 <th>Quantity Name</th>
@@ -197,7 +197,19 @@ const AdminViewProduct = () => {
                   <td>{product.description}</td>
                   <td>{product.price}</td>
                   <td>{product.offerDescription}</td>
-                  <td>{product.stock}</td>
+                  <td>
+                    {product.shopStocks && product.shopStocks.length > 0 ? (
+                      <ul className="stock-list">
+                        {product.shopStocks.map((stock, index) => (
+                          <li key={index}>
+                            {stock.shopName}: {stock.quantity} {stock.unit}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
                   <td>{product.unit || '-'}</td>
                   <td>{product.shopName || '-'}</td>
                   <td>{product.quantityName || '-'}</td>
@@ -228,7 +240,6 @@ const AdminViewProduct = () => {
                 <label>Description: <input className="form-control" name="description" value={editedProduct.description} onChange={handleInputChange} /></label>
                 <label>Price: <input className="form-control" type="number" name="price" value={editedProduct.price} onChange={handleInputChange} /></label>
                 <label>Offer: <input className="form-control" name="offerDescription" value={editedProduct.offerDescription} onChange={handleInputChange} /></label>
-                <label>Stock: <input className="form-control" type="number" name="stock" value={editedProduct.stock} onChange={handleInputChange} /></label>
                 <label>Unit: <input className="form-control" name="unit" value={editedProduct.unit} onChange={handleInputChange} /></label>
                 <label>Shop Name: <input className="form-control" name="shopName" value={editedProduct.shopName} onChange={handleInputChange} /></label>
                 <label>Quantity Name: <input className="form-control" name="quantityName" value={editedProduct.quantityName} onChange={handleInputChange} /></label>
