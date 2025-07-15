@@ -10,9 +10,7 @@ const AddProduct = async (req, res) => {
         }
 
         const { title, description, category, price, offerDescription, shopStocks } = req.body;
-        const image = req.file;
-
-        
+        const image = req.file; // may be undefined
 
         // Parse shopStocks if it's sent as a JSON string
         let parsedShopStocks;
@@ -22,16 +20,21 @@ const AddProduct = async (req, res) => {
             return res.status(400).json({ message: 'Invalid shopStocks format' });
         }
 
-        const product = await Product.create({
+        const newProduct = {
             title,
             description,
             category,
             price,
             offerDescription,
             shopStocks: parsedShopStocks,
-            image: image.filename,
-            user: req.user.id
-        });
+            user: req.user.id,
+        };
+
+        if (image) {
+            newProduct.image = image.filename;
+        }
+
+        const product = await Product.create(newProduct);
 
         res.status(201).json({ message: 'Product added successfully', product });
     } catch (error) {
@@ -39,6 +42,7 @@ const AddProduct = async (req, res) => {
         res.status(500).json({ message: 'Error occurred while adding the product' });
     }
 };
+
 
 // Get all products
 const GetProduct = async (req, res) => {
@@ -66,49 +70,52 @@ const GetProductById = async (req, res) => {
 
 // Update product
 const UpdateProduct = async (req, res) => {
-    try {
-        const id = req.params.id;
-        if (req.user.role !== 'admin') {
-            return res.status(401).json({ message: 'You are not authorized to perform this action' });
-        }
+  try {
+    const id = req.params.id;
 
-        const { title, description, category, price, offerDescription, shopStocks } = req.body;
-        const image = req.file;
-
-        const product = await Product.findById(id);
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-
-        // Update fields
-        if (title) product.title = title;
-        if (description) product.description = description;
-        if (category) product.category = category;
-        if (price) product.price = price;
-        if (offerDescription) product.offerDescription = offerDescription;
-
-        // Handle shopStocks
-        if (shopStocks) {
-            try {
-                product.shopStocks = typeof shopStocks === 'string' ? JSON.parse(shopStocks) : shopStocks;
-            } catch (error) {
-                return res.status(400).json({ message: 'Invalid shopStocks format' });
-            }
-        }
-
-        // Update image
-        if (image) {
-            product.image = image.filename;
-        }
-
-        const updatedProduct = await product.save();
-        res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
-
-    } catch (error) {
-        console.error("UpdateProduct error:", error);
-        res.status(500).json({ message: 'Error occurred during product update' });
+    if (req.user.role !== 'admin') {
+      return res.status(401).json({ message: 'You are not authorized to perform this action' });
     }
+
+    const { title, description, category, price, offerDescription, shopStocks } = req.body;
+    const image = req.file;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Update fields only if they are provided
+    if (title !== undefined) product.title = title;
+    if (description !== undefined) product.description = description;
+    if (category !== undefined) product.category = category;
+    if (price !== undefined) product.price = price;
+    if (offerDescription !== undefined) product.offerDescription = offerDescription;
+
+    // Handle shopStocks update
+    if (shopStocks !== undefined) {
+      try {
+        const parsedShopStocks = typeof shopStocks === 'string' ? JSON.parse(shopStocks) : shopStocks;
+        product.shopStocks = parsedShopStocks;
+      } catch (error) {
+        return res.status(400).json({ message: 'Invalid shopStocks format' });
+      }
+    }
+
+    // Optional image update
+    if (image) {
+      product.image = image.filename;
+    }
+
+    const updatedProduct = await product.save();
+    res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
+
+  } catch (error) {
+    console.error("UpdateProduct error:", error);
+    res.status(500).json({ message: 'Error occurred during product update' });
+  }
 };
+
 
 // Delete product
 const DeleteProduct = async (req, res) => {
