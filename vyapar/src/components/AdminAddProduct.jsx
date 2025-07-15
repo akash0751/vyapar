@@ -253,7 +253,7 @@ const AdminAddProduct = () => {
                             id="image"
                             accept="image/*"
                             onChange={handleImageChange}
-                            required
+                            
                         />
 
                         <button type="submit" className="add-btn">Add</button>
