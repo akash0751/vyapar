@@ -28,9 +28,7 @@ const Cart = () => {
 
   const filteredItems = searchQuery
     ? cart.filter((item) =>
-        item.product?.title
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase())
+        item.product?.title?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : cart;
 
@@ -77,23 +75,21 @@ const Cart = () => {
           filteredItems.map((item, index) => {
             if (!item.product) return null;
 
-            // Get shop stock info (assuming selected shop is the first for now)
-            const shopStock = item.product.shopStocks?.[0]; // You can enhance by saving selectedShopId in cart item
-
+            const product = item.product;
+            const shopStock = product.shopStocks?.[0]; // assumes 1st shop for now
             const isStockExceeded =
               shopStock && item.quantity > shopStock.quantity;
 
             return (
-              <div key={item.product._id || index} className={styles.cartItem}>
+              <div key={product._id || index} className={styles.cartItem}>
                 <img
-                  src={`${api}/uploads/${item.product.image}`}
-                  alt={item.product.title}
+                  src={`${api}/uploads/${product.image}`}
+                  alt={product.title}
                   className={styles.cartItemImage}
                 />
                 <div className={styles.cartItemDetails}>
-                  <h3>{item.product.title}</h3>
+                  <h3>{product.title}</h3>
 
-                  {/* Shop and Quantity Details */}
                   {shopStock ? (
                     <p>
                       From: <strong>{shopStock.shopName}</strong> | Available:{" "}
@@ -110,18 +106,18 @@ const Cart = () => {
                     {shopStock?.unit ? shopStock.unit : ""}
                   </p>
                   <p>
-                    Price: ₹{(item.product.price * item.quantity).toFixed(2)}
+                    Price: ₹{(product.price * item.quantity).toFixed(2)}
                   </p>
 
                   <div className={styles.quantityControls}>
                     <button
-                      onClick={() => decreaseQuantity(item.product._id)}
+                      onClick={() => decreaseQuantity(product._id)}
                       className={styles.quantityBtn}
                     >
                       -
                     </button>
                     <button
-                      onClick={() => increaseQuantity(item.product._id)}
+                      onClick={() => increaseQuantity(product._id)}
                       className={styles.quantityBtn}
                     >
                       +
@@ -130,13 +126,13 @@ const Cart = () => {
 
                   {isStockExceeded && (
                     <p className={styles.warningText}>
-                      ⚠️ Only {shopStock.quantity}{" "}
-                      {shopStock.unit || "unit"} available in stock.
+                      ⚠️ Only {shopStock.quantity} {shopStock.unit} available in
+                      stock.
                     </p>
                   )}
 
                   <button
-                    onClick={() => removeFromCart(item.product._id)}
+                    onClick={() => removeFromCart(product._id)}
                     className={styles.removeBtn}
                   >
                     Remove
@@ -146,18 +142,18 @@ const Cart = () => {
             );
           })
         ) : (
-          <p className={styles.emptyCart}>No items match your search.</p>
+          <p className={styles.emptyCart}>🛒 Your cart is empty.</p>
         )}
       </div>
 
       {/* Cart Total */}
       {filteredItems.length > 0 && (
         <div className={styles.cartTotals}>
-          <h2>Cart totals</h2>
+          <h2>Cart Totals</h2>
           <p>Subtotal: ₹{calculateTotal().toFixed(2)}</p>
           <p>Shipping: ₹8.00</p>
           <p>Tax: ₹0.72</p>
-          <p>Total: ₹{(calculateTotal() + 8.0 + 0.72).toFixed(2)}</p>
+          <p>Total: ₹{(calculateTotal() + 8 + 0.72).toFixed(2)}</p>
           <button
             onClick={handlePurchaseMore}
             className={styles.purchaseMoreBtn}

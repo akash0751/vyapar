@@ -31,20 +31,28 @@ const addtoCart = async (req, res) => {
 
     //get cart items
     const getCartItems = async (req, res) => {
-        try {
-          
-            const userId = req.user.id;
-            const cart = await Cart.findOne({ user: userId }).populate({path:"items.product",select:"_id title price image"});
-            
-            if (!cart) {
-              return res.status(404).json({ message: "Cart is empty" });
-            }
-           cart.items = cart.items.filter(item => item.product !== null);
-            res.status(200).json(cart);
-          } catch (error) {
-            res.status(500).json({ error: "Something went wrong" });
-          }
-        };
+  try {
+    const userId = req.user.id;
+
+    const cart = await Cart.findOne({ user: userId }).populate({
+      path: "items.product",
+      select: "_id title price image shopStocks",
+    });
+
+    if (!cart) {
+      return res.status(200).json({ items: [] }); // Return empty array instead of 404
+    }
+
+    // Remove items with missing product reference
+    cart.items = cart.items.filter(item => item.product !== null);
+
+    res.status(200).json({ items: cart.items });
+  } catch (error) {
+    console.error("Cart Fetch Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
         //remove item from cart
         const removeItemFromCart = async (req, res) => {
