@@ -1,5 +1,5 @@
 import { FaUserCircle, FaShoppingCart, FaBell, FaHome } from "react-icons/fa";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Home.css";
 import axiosInstance from "../utils/axiosInstance";
@@ -11,11 +11,13 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token") || localStorage.getItem("authToken");
   const api = import.meta.env.VITE_API_URL;
+
+  const observerRef = useRef();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -32,10 +34,6 @@ const Home = () => {
     fetchProducts();
   }, []);
 
-  const handleProductClick = (id) => navigate(`/product/${id}`);
-  const handleCartClick = () => navigate("/cart");
-  const handleProfileClick = () => navigate(token ? "/profile" : "/login");
-
   const productsByCategory = products.reduce((acc, product) => {
     const cat = product.category?.toLowerCase() || "others";
     if (!acc[cat]) acc[cat] = [];
@@ -43,22 +41,38 @@ const Home = () => {
     return acc;
   }, {});
 
-  const allFiltered = searchQuery
+  const filteredProducts = searchQuery
     ? products.filter((product) =>
         product.title.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : productsByCategory[category] || [];
 
-  const startIdx = (page - 1) * PRODUCTS_PER_PAGE;
-  const paginatedProducts = allFiltered.slice(startIdx, startIdx + PRODUCTS_PER_PAGE);
-  const hasMore = startIdx + PRODUCTS_PER_PAGE < allFiltered.length;
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
 
-  const handleNext = () => setPage((prev) => prev + 1);
-  const handlePrev = () => setPage((prev) => (prev > 1 ? prev - 1 : 1));
+  const handleProductClick = (id) => navigate(`/product/${id}`);
+  const handleCartClick = () => navigate("/cart");
+  const handleProfileClick = () => navigate(token ? "/profile" : "/login");
 
-  // Reset page on search/category change
+  // Infinite Scroll Observer
+  const lastProductRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && visibleCount < filteredProducts.length) {
+          setVisibleCount((prev) => prev + PRODUCTS_PER_PAGE);
+        }
+      });
+
+      if (node) observerRef.current.observe(node);
+    },
+    [loading, filteredProducts.length, visibleCount]
+  );
+
+  // Reset visible count when search/category changes
   useEffect(() => {
-    setPage(1);
+    setVisibleCount(PRODUCTS_PER_PAGE);
   }, [category, searchQuery]);
 
   return (
@@ -124,20 +138,22 @@ const Home = () => {
         </h2>
       )}
 
-      {/* Loading Spinner */}
+      {/* Product Grid */}
       {loading ? (
         <div className="loading-container">
           <div className="spinner"></div>
           <p>Loading products...</p>
         </div>
       ) : (
-        <div className="product-section">
-          <div className="product-grid">
-            {paginatedProducts.length > 0 ? (
-              paginatedProducts.map((product) => (
+        <div className="product-grid">
+          {visibleProducts.length > 0 ? (
+            visibleProducts.map((product, index) => {
+              const isLast = index === visibleProducts.length - 1;
+              return (
                 <div
                   key={product._id}
                   className="product-card"
+                  ref={isLast ? lastProductRef : null}
                   onClick={() => handleProductClick(product._id)}
                 >
                   <div className="product-discount">Limited Offer</div>
@@ -151,30 +167,10 @@ const Home = () => {
                     <p className="product-price">₹{product.price.toFixed(2)}</p>
                   </div>
                 </div>
-              ))
-            ) : (
-              <p className="no-products">No products available</p>
-            )}
-          </div>
-
-          {/* Pagination Controls */}
-          {allFiltered.length > PRODUCTS_PER_PAGE && (
-            <div className="pagination-controls">
-              <button
-                className="btn btn-outline-secondary me-2"
-                disabled={page === 1}
-                onClick={handlePrev}
-              >
-                Previous
-              </button>
-              <button
-                className="btn btn-outline-primary"
-                disabled={!hasMore}
-                onClick={handleNext}
-              >
-                Load More
-              </button>
-            </div>
+              );
+            })
+          ) : (
+            <p className="no-products">No products found</p>
           )}
         </div>
       )}
