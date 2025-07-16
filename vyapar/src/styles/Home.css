@@ -301,3 +301,11 @@ body {
 }
 
 
+.pagination-controls {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.pagination-controls button {
+  min-width: 120px;
+}

@@ -1,17 +1,20 @@
 import { FaUserCircle, FaShoppingCart, FaBell, FaHome } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import '../styles/Home.css';
+import "../styles/Home.css";
 import axiosInstance from "../utils/axiosInstance";
+
+const PRODUCTS_PER_PAGE = 8;
 
 const Home = () => {
   const [category, setCategory] = useState("fruits");
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true); // ⏳ Loading state
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   const navigate = useNavigate();
-  const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+  const token = localStorage.getItem("token") || localStorage.getItem("authToken");
   const api = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -19,9 +22,9 @@ const Home = () => {
       try {
         const res = await axiosInstance.get(`${api}/api/products`);
         setProducts(res.data.product);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching products", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -40,11 +43,23 @@ const Home = () => {
     return acc;
   }, {});
 
-  const filteredProducts = searchQuery
-    ? products.filter(product =>
+  const allFiltered = searchQuery
+    ? products.filter((product) =>
         product.title.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : productsByCategory[category] || [];
+
+  const startIdx = (page - 1) * PRODUCTS_PER_PAGE;
+  const paginatedProducts = allFiltered.slice(startIdx, startIdx + PRODUCTS_PER_PAGE);
+  const hasMore = startIdx + PRODUCTS_PER_PAGE < allFiltered.length;
+
+  const handleNext = () => setPage((prev) => prev + 1);
+  const handlePrev = () => setPage((prev) => (prev > 1 ? prev - 1 : 1));
+
+  // Reset page on search/category change
+  useEffect(() => {
+    setPage(1);
+  }, [category, searchQuery]);
 
   return (
     <div className="home-container">
@@ -116,28 +131,50 @@ const Home = () => {
           <p>Loading products...</p>
         </div>
       ) : (
-        <div className="product-grid">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <div
-                key={product._id}
-                className="product-card"
-                onClick={() => handleProductClick(product._id)}
-              >
-                <div className="product-discount">Limited Offer</div>
-                <img
-                  src={`${api}/uploads/${product.image}`}
-                  alt={product.title}
-                  style={{ width: "150px", height: "150px", objectFit: "cover" }}
-                />
-                <div className="product-info">
-                  <h3 className="product-name">{product.title}</h3>
-                  <p className="product-price">₹{product.price.toFixed(2)}</p>
+        <div className="product-section">
+          <div className="product-grid">
+            {paginatedProducts.length > 0 ? (
+              paginatedProducts.map((product) => (
+                <div
+                  key={product._id}
+                  className="product-card"
+                  onClick={() => handleProductClick(product._id)}
+                >
+                  <div className="product-discount">Limited Offer</div>
+                  <img
+                    src={`${api}/uploads/${product.image}`}
+                    alt={product.title}
+                    style={{ width: "150px", height: "150px", objectFit: "cover" }}
+                  />
+                  <div className="product-info">
+                    <h3 className="product-name">{product.title}</h3>
+                    <p className="product-price">₹{product.price.toFixed(2)}</p>
+                  </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <p className="no-products">No products available</p>
+              ))
+            ) : (
+              <p className="no-products">No products available</p>
+            )}
+          </div>
+
+          {/* Pagination Controls */}
+          {allFiltered.length > PRODUCTS_PER_PAGE && (
+            <div className="pagination-controls">
+              <button
+                className="btn btn-outline-secondary me-2"
+                disabled={page === 1}
+                onClick={handlePrev}
+              >
+                Previous
+              </button>
+              <button
+                className="btn btn-outline-primary"
+                disabled={!hasMore}
+                onClick={handleNext}
+              >
+                Load More
+              </button>
+            </div>
           )}
         </div>
       )}
