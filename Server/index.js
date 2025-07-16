@@ -7,6 +7,7 @@ const registerRoute = require('./routes/register');
 const productRoutes = require('./routes/product');
 const cartRoutes = require('./routes/cart')
 const orderRoutes = require('./routes/order');
+const feedbackRoutes = require('./routes/feedbackRoutes')
 const path = require('path');
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use('/api', registerRoute);
 app.use('/api',productRoutes);
 app.use('/api',cartRoutes);
 app.use('/api/order',orderRoutes)
+app.use('/api',feedbackRoutes)
 
 // Start Server
 app.listen(process.env.PORT, () => {

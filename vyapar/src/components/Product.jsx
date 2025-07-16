@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import {
-  FaSearch,
   FaShoppingCart,
   FaBell,
   FaUserCircle,
@@ -27,17 +26,23 @@ const Product = () => {
   const api = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axiosInstance.get(`${api}/api/product/${id}`);
-        setProduct(response.data.product);
-        setLoading(false);
+        const [productRes, reviewRes, questionRes] = await Promise.all([
+          axiosInstance.get(`${api}/api/product/${id}`),
+          axiosInstance.get(`${api}/api/review/${id}`),
+          axiosInstance.get(`${api}/api/question/${id}`),
+        ]);
+        setProduct(productRes.data.product);
+        setReviews(reviewRes.data.reviews);
+        setQuestions(questionRes.data.questions);
       } catch (error) {
-        console.error("Error fetching product:", error);
+        console.error("Error fetching product data:", error);
+      } finally {
         setLoading(false);
       }
     };
-    fetchProduct();
+    fetchData();
   }, [id]);
 
   if (loading) return <div className="text-center mt-5">Loading product...</div>;
@@ -46,9 +51,8 @@ const Product = () => {
     return <div className="text-danger text-center mt-5">Product data is invalid</div>;
   }
 
-  const discountedPrice =
-    (product.price ? product.price : 0) *
-    (1 - (product.discount ? product.discount / 100 : 0));
+  const discountedPrice = product.price * (1 - (product.discount ? product.discount / 100 : 0));
+  const selectedStock = product?.shopStocks?.[selectedShopIndex];
 
   const handleAddToCart = async () => {
     const token = localStorage.getItem("token");
@@ -75,23 +79,41 @@ const Product = () => {
     }
   };
 
-  const handleGoToCart = () => navigate("/cart");
+  const handleSubmitReview = async () => {
+    if (!review.trim()) return;
+    const token = localStorage.getItem("token");
+    if (!token) return navigate("/login");
 
-  const handleSubmitReview = () => {
-    if (review.trim()) {
-      setReviews((prev) => [...prev, review]);
+    try {
+      const res = await axiosInstance.post(
+        `${api}/api/review`,
+        { productId: id, comment: review },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setReviews((prev) => [...prev, res.data.review]);
       setReview("");
+    } catch (err) {
+      console.error("Review submission error:", err.response?.data || err.message);
     }
   };
 
-  const handleSubmitQuestion = () => {
-    if (question.trim()) {
-      setQuestions((prev) => [...prev, question]);
+  const handleSubmitQuestion = async () => {
+    if (!question.trim()) return;
+    const token = localStorage.getItem("token");
+    if (!token) return navigate("/login");
+
+    try {
+      const res = await axiosInstance.post(
+        `${api}/api/question`,
+        { productId: id, question },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setQuestions((prev) => [...prev, res.data.question]);
       setQuestion("");
+    } catch (err) {
+      console.error("Question submission error:", err.response?.data || err.message);
     }
   };
-
-  const selectedStock = product?.shopStocks?.[selectedShopIndex];
 
   return (
     <div>
@@ -151,7 +173,7 @@ const Product = () => {
               <button className="btn btn-primary" onClick={handleAddToCart}>
                 Add to Cart
               </button>
-              <button className="btn btn-success" onClick={handleGoToCart}>
+              <button className="btn btn-success" onClick={() => navigate("/cart")}>
                 Buy Now
               </button>
             </div>
@@ -185,15 +207,16 @@ const Product = () => {
           </button>
 
           <div className="mt-3">
-            {reviews.map((text, index) => (
+            {reviews.map((rev, index) => (
               <div key={index} className="border p-2 rounded mb-2 bg-light">
-                <p>{text}</p>
+                <p className="fw-bold mb-1">{rev.user?.name || "Anonymous"}:</p>
+                <p className="mb-0">{rev.comment}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Q & A */}
+        {/* Questions */}
         <div className="mt-4">
           <h4>Q & A ({questions.length})</h4>
           <textarea
@@ -208,9 +231,10 @@ const Product = () => {
           </button>
 
           <div className="mt-3">
-            {questions.map((text, index) => (
+            {questions.map((q, index) => (
               <div key={index} className="border p-2 rounded mb-2 bg-light">
-                <p>{text}</p>
+                <p className="fw-bold mb-1">{q.user?.name || "Anonymous"} asked:</p>
+                <p className="mb-0">{q.question}</p>
               </div>
             ))}
           </div>
