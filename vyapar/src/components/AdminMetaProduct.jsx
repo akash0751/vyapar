@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import '../styles/AddProductMeta.css'; // Create this CSS for custom styling
 import adminAxiosInstance from '../utils/adminAxiosInstance';
 
 const AddProductMeta = () => {
