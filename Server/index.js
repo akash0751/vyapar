@@ -8,6 +8,7 @@ const productRoutes = require('./routes/product');
 const cartRoutes = require('./routes/cart')
 const orderRoutes = require('./routes/order');
 const feedbackRoutes = require('./routes/feedbackRoutes')
+const metaRoutes = require('./routes/productMeta')
 const path = require('path');
 dotenv.config();
 
@@ -27,7 +28,7 @@ app.use('/api',productRoutes);
 app.use('/api',cartRoutes);
 app.use('/api/order',orderRoutes)
 app.use('/api',feedbackRoutes)
-
+app.use('/api',metaRoutes)
 // Start Server
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
