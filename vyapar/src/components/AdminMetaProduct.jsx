@@ -49,7 +49,7 @@ const AddProductMeta = () => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
     try {
-      await adminAxiosInstance.post(`${api}/api/productMeta`, formData, {
+      await adminAxiosInstance.post(`${api}/api/addMeta`, formData, {
         headers: { authorization: `Bearer ${token}` },
       });
       setSuccessMsg('Product metadata added successfully!');

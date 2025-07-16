@@ -3,9 +3,9 @@ const router = express.Router()
 const {addProductMeta, getProductMeta, updateProductMeta, deleteProductMeta} = require('../Controller/productMetaController')
 const {authenticateJWT} = require('../Middleware/Authorization')
 
-router.post("/", authenticateJWT, addProductMeta);
-router.get("/:productId", getProductMeta);
-router.put("/:id", authenticateJWT, updateProductMeta);
-router.delete("/:id", authenticateJWT, deleteProductMeta);
+router.post("/addMeta", authenticateJWT, addProductMeta);
+router.get("/meta/:productId", getProductMeta);
+router.put("/updateMeta/:id", authenticateJWT, updateProductMeta);
+router.delete("deleteMeta/:id", authenticateJWT, deleteProductMeta);
 
 module.exports = router;
