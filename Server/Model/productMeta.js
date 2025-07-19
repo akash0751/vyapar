@@ -32,4 +32,5 @@ const productMetaSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-export default mongoose.model("ProductMeta", productMetaSchema);
+const ProductMeta = mongoose.model("ProductMeta", productMetaSchema);
+module.exports = ProductMeta;
