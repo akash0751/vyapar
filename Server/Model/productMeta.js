@@ -1,5 +1,5 @@
 // models/ProductMeta.js
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 const productMetaSchema = new mongoose.Schema({
   product: {
