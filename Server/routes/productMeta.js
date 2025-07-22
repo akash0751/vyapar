@@ -4,8 +4,18 @@ const {addProductMeta, getProductMeta, updateProductMeta, deleteProductMeta} = r
 const {authenticateJWT} = require('../Middleware/Authorization')
 
 router.post("/addMeta", authenticateJWT, addProductMeta);
-router.get("/meta/:productId", getProductMeta);
-router.put("/updateMeta/:id", authenticateJWT, updateProductMeta);
-router.delete("deleteMeta/:id", authenticateJWT, deleteProductMeta);
-
+router.get("/productMeta/:productId", getProductMeta);
+router.put("/productMeta/:id", authenticateJWT, updateProductMeta);
+router.delete("productMeta/:id", authenticateJWT, deleteProductMeta);
+router.get('/productMeta/all', auth, async (req, res) => {
+  try {
+    const metas = await require('../models/ProductMeta')
+      .find()
+      .populate('product', 'title')
+      .populate('addedBy', 'name');
+    res.json({ success: true, meta: metas });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 module.exports = router;
