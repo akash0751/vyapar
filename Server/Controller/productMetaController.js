@@ -1,15 +1,16 @@
 // controllers/productMetaController.js
 const ProductMeta =require( "../Model/productMeta");
+
 const getAllProductMeta = async (req, res) => {
   try {
-    const allMeta = await ProductMeta.find()
-      .populate("product", "title")       // Populate product title
-      .populate("addedBy", "name email"); // Populate user who added it
+    const metaList = await ProductMeta.find()
+      .populate("product", "title")
+      .populate("addedBy", "name email");
 
-    res.status(200).json(allMeta);
+    res.status(200).json({ success: true, data: metaList });
   } catch (error) {
     console.error("Error in getAllProductMeta:", error);
-    res.status(500).json({ message: "Failed to fetch product metadata" });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 // Create metadata entry
