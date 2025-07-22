@@ -1,6 +1,17 @@
 // controllers/productMetaController.js
 const ProductMeta =require( "../Model/productMeta");
+const getAllProductMeta = async (req, res) => {
+  try {
+    const allMeta = await ProductMeta.find()
+      .populate("product", "title")       // Populate product title
+      .populate("addedBy", "name email"); // Populate user who added it
 
+    res.status(200).json(allMeta);
+  } catch (error) {
+    console.error("Error in getAllProductMeta:", error);
+    res.status(500).json({ message: "Failed to fetch product metadata" });
+  }
+};
 // Create metadata entry
 const addProductMeta = async (req, res) => {
   try {
@@ -66,4 +77,4 @@ const deleteProductMeta = async (req, res) => {
   }
 };
 
-module.exports = {addProductMeta, getProductMeta, updateProductMeta, deleteProductMeta}
+module.exports = {getAllProductMeta,addProductMeta, getProductMeta, updateProductMeta, deleteProductMeta}
