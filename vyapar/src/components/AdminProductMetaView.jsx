@@ -10,7 +10,7 @@ const AdminProductMetaView = () => {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const api = import.meta.env.VITE_API_URL;
-
+const token = localStorage.getItem('adminToken');
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (!token) return navigate('/');
@@ -25,8 +25,8 @@ const AdminProductMetaView = () => {
 
   const fetchMeta = async () => {
     try {
-      const res = await adminAxiosInstance.get(`${api}/api/productMeta/all`, {
-        headers: { authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+      const res = await adminAxiosInstance.get(`${api}/api/productMeta`, {
+        headers: { authorization: `Bearer ${token}` },
       });
       setMetaList(res.data.meta);
     } catch (err) {

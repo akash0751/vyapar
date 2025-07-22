@@ -8,5 +8,5 @@ router.post("/addMeta", authenticateJWT, addProductMeta);
 router.get("/productMeta/:productId", getProductMeta);
 router.put("/productMeta/:id", authenticateJWT, updateProductMeta);
 router.delete("productMeta/:id", authenticateJWT, deleteProductMeta);
-router.get("/productMeta/all", authenticateJWT,getAllProductMeta );
+router.get("/productMeta", authenticateJWT,getAllProductMeta );
 module.exports = router;
