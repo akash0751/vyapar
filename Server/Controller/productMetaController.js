@@ -7,7 +7,7 @@ const getAllProductMeta = async (req, res) => {
       .populate("product", "title")
       .populate("addedBy", "name email");
 
-    res.status(200).json({ success: true, data: metaList });
+    res.status(200).json({ success: true, meta: metaList });
   } catch (error) {
     console.error("Error in getAllProductMeta:", error);
     res.status(500).json({ success: false, error: error.message });
