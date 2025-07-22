@@ -4,10 +4,7 @@ const ProductMeta =require( "../Model/productMeta");
 const getAllProductMeta = async (req, res) => {
   try {
     const metaList = await ProductMeta.find()
-      .populate("product", "title")
-      .populate("addedBy", "name email");
-
-    res.status(200).json({ success: true, meta: metaList });
+    res.json({meta:metaList})
   } catch (error) {
     console.error("Error in getAllProductMeta:", error);
     res.status(500).json({ success: false, error: error.message });
