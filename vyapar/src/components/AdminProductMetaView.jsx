@@ -25,7 +25,7 @@ const token = localStorage.getItem('adminToken');
 
   const fetchMeta = async () => {
     try {
-      const res = await adminAxiosInstance.get(`${api}/api/productMeta`, {
+      const res = await adminAxiosInstance.get(`${api}/api`, {
         headers: { authorization: `Bearer ${token}` },
       });
       setMetaList(res.data.meta);
