@@ -9,7 +9,7 @@ router.put("/productMeta/:id", authenticateJWT, updateProductMeta);
 router.delete("productMeta/:id", authenticateJWT, deleteProductMeta);
 router.get('/productMeta/all', authenticateJWT, async (req, res) => {
   try {
-    const metas = await require('../models/ProductMeta')
+    const metas = await require('../Model/productMeta')
       .find()
       .populate('product', 'title')
       .populate('addedBy', 'name');
