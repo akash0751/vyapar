@@ -21,6 +21,7 @@ import AdminViewProduct from "./components/AdminViewProduct";
 import AdminHome from "./components/AdminHome";
 import AdminViewDetails from "./components/AdminViewDetails";
 import AddProductMeta from "./components/AdminMetaProduct";
+import AdminProductMetaView from "./components/AdminProductMetaView";
 
 const App = () => {
   return (
@@ -45,6 +46,7 @@ const App = () => {
           <Route path="/adminhome" element={<AdminHome />} />
           <Route path="/admindetials" element={<AdminViewDetails />} />
           <Route path="/productMeta" element={<AddProductMeta />} />
+          <Route path="/viewMeta" element={<AdminProductMetaView />} />
         </Routes>
       </Router>
     </CartProvider>

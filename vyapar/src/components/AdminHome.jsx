@@ -38,7 +38,8 @@ const AdminHome = () => {
           <Link to="/adminproduct" className="button">Add Product</Link>
           <Link to="/adminview" className="button">View Product</Link>
           <Link to="/admin-dashboard" className="button">Admin Dashboard</Link>
-          <Link to="/productMeta" className="button">Meta Details</Link>
+          <Link to="/productMeta" className="button">Add Meta Details</Link>
+          <Link to="/viewMeta" className="button">Meta Details</Link>
         </div>
       </main>
     </div>
