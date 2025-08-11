@@ -118,8 +118,8 @@ const Product = () => {
   return (
     <div>
       {/* Navbar */}
-      <nav className="navbar bg-dark text-white px-4 d-flex justify-content-between">
-        <div className="navbar-brand fw-bold text-white">CORE FOUR</div>
+      <nav className="navbar">
+        <div className="navbar-brand">CORE FOUR</div>
         <div className="navbar-icons d-flex gap-3">
           <FaHome className="icon" onClick={() => navigate("/")} />
           <FaShoppingCart className="icon" onClick={() => navigate("/cart")} />
